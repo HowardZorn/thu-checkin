@@ -6,17 +6,23 @@ import PIL
 import pytesseract
 import re
 import requests
+import argparse
 
 # https://stackoverflow.com/a/35504626/5958455
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
 
+argp = argparse.ArgumentParser()
+argp.add_argument('conf')
+argp.add_argument('--hook', '-H', help='Hook for reporting')
+
+args = argp.parse_args()
+
 print("Tsinghua University Daily Health Report")
 
-dirname = os.path.dirname(os.path.realpath(__file__))
 data = {}
-with open(os.path.join(dirname, "thu-checkin.txt"), "r") as f:
+with open(args.conf, "r") as f:
     for line in f:
         k, v = line.strip().split('=', 1)
         data[k] = v
@@ -26,6 +32,9 @@ password = data["PASSWORD"]
 province = data['PROVINCE']
 city = data["CITY"]
 country = data["COUNTRY"]
+emergency_contact_name = data['EMERGENCY_NAME']
+emergency_contact_relationship = data['EMERGENCY_RELATION']
+emergency_contact_num = data['EMERGENCY_NUM']
 is_inschool = data.get("IS_INSCHOOL", "2")
 
 # 1: 在校园内, 2: 正常在家
@@ -100,11 +109,10 @@ data = {
     "last_touch_sars_detail": "",
     "is_danger": "0",
     "is_goto_danger": "0",
-    "jinji_lxr": "\uFFFD",
-    "jinji_guanxi": "\uFFFD",
-    "jiji_mobile": "\uFFFD",
-    "other_detail": "\uFFFD",
-    # https://twitter.com/tenderlove/status/722565868719177729
+    "jinji_lxr": emergency_contact_name,
+    "jinji_guanxi": emergency_contact_relationship,
+    "jiji_mobile": emergency_contact_num,
+    "other_detail": "",
 }
 
 # Set "in_school" only when located in the right city

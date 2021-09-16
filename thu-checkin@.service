@@ -1,0 +1,8 @@
+[Unit]
+Description=Tsinghua University Daily Checkin Service for %i
+After=network.target network-online.target
+
+[Service]
+Type=oneshot
+User=%i
+ExecStart=/usr/bin/thu-checkin.py /home/%i/.config/thu-checkin.txt

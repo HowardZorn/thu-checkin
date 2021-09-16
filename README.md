@@ -1,5 +1,7 @@
 # 清华大学每日健康打卡 systemd 版
 
+感谢原作者iBug，这是本人的改进版本。
+
 环境要求：
 
 - 一个 24 小时开机的 Linux 操作系统（需要使用 systemd，如 Ubuntu 18.04, Debian Stretch, CentOS 7, Fedora 等，树莓派也行）
@@ -12,9 +14,9 @@
 
 用法：
 
-- 将 `thu-checkin.py` 复制到 `/root` 目录下
-- 将 `thu-checkin.service` 和 `thu-checkin.timer` 复制到 `/etc/systemd/system` 目录下，并执行 `systemctl daemon-reload` 和 `systemctl enable --now thu-checkin.timer`
-- 在 `/root` 目录下创建 [`thu-checkin.txt` 文件](thu-checkin.example.txt)，填入以下内容：
+- 用特权用户运行 `install.sh`
+- 执行 `systemctl enable --now thu-checkin@你的用户名.timer`
+- 在 `~/.config` 目录下创建 [`thu-checkin.txt` 文件](thu-checkin.example.txt)（联系人部分请不要直接使用，会社死的），填入以下内容：
 
     ```ini
     USERNAME=清华大学用户电子身份服务系统（即 CAS）学号
@@ -23,6 +25,9 @@
     CITY=城市代号
     COUNTRY=区县代号
     IS_INSCHOOL=在校状态
+    EMERGENCY_NAME=紧急联系人姓名
+    EMERGENCY_RELATION=紧急联系人关系
+    EMERGENCY_NUM=紧急联系人电话
     ```
 
     其中省份、城市和区县代号可以在 [这里](http://www.tcmap.com.cn/list/daima_list.html) 查到。
@@ -45,13 +50,7 @@
 
 本套件默认在系统本地时间每天 8:00 至 11:00 之间随机选择一个时间打卡一次，请确保你的系统时钟和时区设置是正确的，或者自行编辑 `thu-checkin.timer` 文件设置打卡时间。
 
-你可以使用 `systemctl status thu-checkin.timer` 查看打卡记录和下次打卡时间。
-
-如果你有其他需求，例如打卡结果自动通知等，请自行修改 Python 程序实现。提示：仓库里的 Python 文件末尾已经有判断打卡成功的代码了。
-
-## Docker 方式
-
-请参考 [Dockerfile](Dockerfile) 和 [`run.sh`](run.sh) 自行配置。
+你可以使用 `systemctl status thu-checkin@你的用户名.timer` 查看打卡记录和下次打卡时间。
 
 ## 许可
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=Tsinghua University Daily Checkin Timer
+Description=Tsinghua University Daily Checkin Timer for %i
 
 [Timer]
 OnCalendar=*-*-* 8:00
