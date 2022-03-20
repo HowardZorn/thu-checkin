@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import datetime
 import io
 import os
 import PIL
@@ -29,23 +30,20 @@ with open(args.conf, "r") as f:
 
 username = data["USERNAME"]
 password = data["PASSWORD"]
-province = data['PROVINCE']
-city = data["CITY"]
-country = data["COUNTRY"]
+juzhudi = data['JUZHUDI']
 emergency_contact_name = data['EMERGENCY_NAME']
 emergency_contact_relationship = data['EMERGENCY_RELATION']
 emergency_contact_num = data['EMERGENCY_NUM']
-is_inschool = data.get("IS_INSCHOOL", "2")
-
-# 1: 在校园内, 2: 正常在家
-now_status = "2" if is_inschool == "0" else "1"
-
+lived = data.get("LIVED", "2")
+reason = data.get("REASON", "3")
 
 CAS_LOGIN_URL = "https://passport.ustc.edu.cn/login"
 CAS_CAPTCHA_URL = "https://passport.ustc.edu.cn/validatecode.jsp?type=login"
 CAS_RETURN_URL = "https://weixine.ustc.edu.cn/2020/caslogin"
 REPORT_URL = "https://weixine.ustc.edu.cn/2020/daliy_report"
 # Not my fault:                                  ^^
+WEEKLY_APPLY_URL = "https://weixine.ustc.edu.cn/2020/apply/daliy"
+WEEKLY_APPLY_POST_URL = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
 
 
 retries = Retry(total=5,
@@ -90,18 +88,10 @@ token = re.search(r'value="(\w*)"', x).group(1)
 
 data = {
     "_token": token,
-    "now_address": "1",
-    "gps_now_address": "",
-    "now_province": province,
-    "gps_province": "",
-    "now_city": city,
-    "gps_city": "",
-    "now_country": country,
-    "gps_country": "",
-    "now_detail": "",
+    "juzhudi": juzhudi,
     "body_condition": "1",
     "body_condition_detail": "",
-    "now_status": now_status,
+    "now_status": "1",
     "now_status_detail": "",
     "has_fever": "0",
     "last_touch_sars": "0",
@@ -115,10 +105,6 @@ data = {
     "other_detail": "",
 }
 
-# Set "in_school" only when located in the right city
-if province == "340000" and city == "340100":
-    data["is_inschool"] = is_inschool
-
 r = s.post(REPORT_URL, data=data)
 
 # Fail if not 200
@@ -126,3 +112,23 @@ r.raise_for_status()
 
 # Fail if not reported
 assert r.text.find("上报成功") >= 0
+
+# Now apply for outgoing
+r = s.get(WEEKLY_APPLY_URL)
+r = s.get(WEEKLY_APPLY_URL, params={"t": f"{lived}{reason}"})
+if "is_inschool" in data:
+    x = re.search(r"""<input.*?name="_token".*?>""", r.text).group(0)
+    token = re.search(r'value="(\w*)"', x).group(1)
+    now = datetime.datetime.now()
+    start_date = now.strftime("%Y-%m-%d %H:%M:%S")
+    end_date = (now + datetime.timedelta(days=1)).strftime("%Y-%m-%d 23:59:59")
+    payload = {
+        "_token": token,
+        "start_date": start_date,
+        "end_date": end_date,
+        "t": f"{lived}{reason}",
+    }
+    r = s.post(WEEKLY_APPLY_POST_URL, json=payload)
+
+    # Fail if not applied
+    assert r.text.find("报备成功") >= 0
