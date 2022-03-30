@@ -24,6 +24,8 @@
     JUZHUDI=居住地
     REASON=出校原因
     RETURN_COLLEGE=进出校区
+    DORM_BUILDING=宿舍楼
+    DORM=宿舍
     EMERGENCY_NAME=紧急联系人姓名
     EMERGENCY_RELATION=紧急联系人关系
     EMERGENCY_NUM=紧急联系人电话

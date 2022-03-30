@@ -36,6 +36,8 @@ emergency_contact_num = data['EMERGENCY_NUM']
 juzhudi = data["JUZHUDI"]
 reason = data["REASON"]
 return_college = data["RETURN_COLLEGE"]
+dorm_building = data["DORM_BUILDING"]
+dorm = data["DORM"]
 
 CAS_LOGIN_URL = "https://passport.ustc.edu.cn/login"
 CAS_CAPTCHA_URL = "https://passport.ustc.edu.cn/validatecode.jsp?type=login"
@@ -89,6 +91,8 @@ token = re.search(r'value="(\w*)"', x).group(1)
 data = {
     "_token": token,
     "juzhudi": juzhudi,
+    "dorm_building": dorm_building,
+    "dorm": dorm,
     "body_condition": "1",
     "body_condition_detail": "",
     "now_status": "1",
