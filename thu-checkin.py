@@ -30,12 +30,12 @@ with open(args.conf, "r") as f:
 
 username = data["USERNAME"]
 password = data["PASSWORD"]
-juzhudi = data['JUZHUDI']
 emergency_contact_name = data['EMERGENCY_NAME']
 emergency_contact_relationship = data['EMERGENCY_RELATION']
 emergency_contact_num = data['EMERGENCY_NUM']
-lived = data.get("LIVED", "2")
-reason = data.get("REASON", "3")
+juzhudi = data["JUZHUDI"]
+reason = data["REASON"]
+return_college = data["RETURN_COLLEGE"]
 
 CAS_LOGIN_URL = "https://passport.ustc.edu.cn/login"
 CAS_CAPTCHA_URL = "https://passport.ustc.edu.cn/validatecode.jsp?type=login"
@@ -115,20 +115,21 @@ assert r.text.find("上报成功") >= 0
 
 # Now apply for outgoing
 r = s.get(WEEKLY_APPLY_URL)
-r = s.get(WEEKLY_APPLY_URL, params={"t": f"{lived}{reason}"})
-if "is_inschool" in data:
+r = s.get(WEEKLY_APPLY_URL, params={"t": reason})
+if True:
     x = re.search(r"""<input.*?name="_token".*?>""", r.text).group(0)
     token = re.search(r'value="(\w*)"', x).group(1)
     now = datetime.datetime.now()
     start_date = now.strftime("%Y-%m-%d %H:%M:%S")
-    end_date = (now + datetime.timedelta(days=1)).strftime("%Y-%m-%d 23:59:59")
+    end_date = (now + datetime.timedelta(days=0)).strftime("%Y-%m-%d 23:59:59")
     payload = {
         "_token": token,
         "start_date": start_date,
         "end_date": end_date,
-        "t": f"{lived}{reason}",
+        "t": reason,
+        "return_college[]": return_college.split(),
     }
-    r = s.post(WEEKLY_APPLY_POST_URL, json=payload)
+    r = s.post(WEEKLY_APPLY_POST_URL, data=payload)
 
     # Fail if not applied
     assert r.text.find("报备成功") >= 0
